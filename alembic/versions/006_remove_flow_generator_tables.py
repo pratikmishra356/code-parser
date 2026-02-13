@@ -17,108 +17,36 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Drop indexes first
-    try:
-        op.drop_index('ix_entry_point_flows_flow', table_name='entry_point_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_point_flows_entry_point', table_name='entry_point_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_request_flows_type', table_name='request_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_request_flows_signature', table_name='request_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_request_flows_entry_point', table_name='request_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_request_flows_repo', table_name='request_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_candidates_confidence', table_name='entry_point_candidates')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_candidates_status', table_name='entry_point_candidates')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_candidates_repo', table_name='entry_point_candidates')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_points_framework', table_name='entry_points')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_points_confidence', table_name='entry_points')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_points_type', table_name='entry_points')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_points_symbol', table_name='entry_points')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_index('ix_entry_points_repo', table_name='entry_points')
-    except Exception:
-        pass
-    
+    # Drop indexes first (IF EXISTS to handle fresh databases)
+    op.execute("DROP INDEX IF EXISTS ix_entry_point_flows_flow")
+    op.execute("DROP INDEX IF EXISTS ix_entry_point_flows_entry_point")
+    op.execute("DROP INDEX IF EXISTS ix_request_flows_type")
+    op.execute("DROP INDEX IF EXISTS ix_request_flows_signature")
+    op.execute("DROP INDEX IF EXISTS ix_request_flows_entry_point")
+    op.execute("DROP INDEX IF EXISTS ix_request_flows_repo")
+    op.execute("DROP INDEX IF EXISTS ix_candidates_confidence")
+    op.execute("DROP INDEX IF EXISTS ix_candidates_status")
+    op.execute("DROP INDEX IF EXISTS ix_candidates_repo")
+    op.execute("DROP INDEX IF EXISTS ix_entry_points_framework")
+    op.execute("DROP INDEX IF EXISTS ix_entry_points_confidence")
+    op.execute("DROP INDEX IF EXISTS ix_entry_points_type")
+    op.execute("DROP INDEX IF EXISTS ix_entry_points_symbol")
+    op.execute("DROP INDEX IF EXISTS ix_entry_points_repo")
+
     # Drop tables (in reverse dependency order)
-    try:
-        op.drop_table('entry_point_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_table('flow_descriptions')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_table('request_flows')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_table('entry_point_candidates')
-    except Exception:
-        pass
-    
-    try:
-        op.drop_table('entry_points')
-    except Exception:
-        pass
-    
-    # Remove languages column from repositories table
-    try:
-        op.drop_column('repositories', 'languages')
-    except Exception:
-        pass
+    op.execute("DROP TABLE IF EXISTS entry_point_flows")
+    op.execute("DROP TABLE IF EXISTS flow_descriptions")
+    op.execute("DROP TABLE IF EXISTS request_flows")
+    op.execute("DROP TABLE IF EXISTS entry_point_candidates")
+    op.execute("DROP TABLE IF EXISTS entry_points")
+
+    # Remove languages column from repositories table (if exists)
+    op.execute("""
+        DO $$ BEGIN
+            ALTER TABLE repositories DROP COLUMN IF EXISTS languages;
+        EXCEPTION WHEN undefined_table THEN NULL;
+        END $$;
+    """)
 
 
 def downgrade() -> None:
