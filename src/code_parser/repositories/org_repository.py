@@ -24,6 +24,7 @@ class OrgRepository:
         )
         self._session.add(model)
         await self._session.flush()
+        await self._session.refresh(model)
         return self._to_domain(model)
 
     async def get_by_id(self, org_id: str) -> Organization | None:
