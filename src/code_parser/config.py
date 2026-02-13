@@ -34,14 +34,10 @@ class Settings(BaseSettings):
     max_file_size_bytes: int = 1_000_000  # 1MB
     parse_timeout_seconds: int = 30
 
-    # AI settings
-    ai_provider: str = "openai"  # openai or claude
-    openai_api_key: str | None = None
-    openai_model: str = "gpt-4"
-    claude_bedrock_url: str = "https://llm-proxy.build.eng.toasttab.com"
-    claude_model_id: str = "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
-    claude_api_key_helper_path: str = "/opt/homebrew/bin/toastApiKeyHelper"  # Can be overridden via CLAUDE_API_KEY_HELPER_PATH env var
-    claude_api_key: str | None = None  # Direct API key (takes precedence over helper) - set via CLAUDE_API_KEY env var
+    # AI / LLM settings
+    claude_bedrock_url: str = ""  # Set via CLAUDE_BEDROCK_URL env var or CodeCircle AI Settings
+    claude_model_id: str = ""  # Set via CLAUDE_MODEL_ID env var or CodeCircle AI Settings
+    claude_api_key: str | None = None  # Set via CLAUDE_API_KEY env var or CodeCircle AI Settings
 
     @field_validator("log_level")
     @classmethod

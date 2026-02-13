@@ -1,8 +1,6 @@
 """AI service for confirming entry points using Claude Bedrock."""
 
-import asyncio
 import json
-import subprocess
 from typing import Any, Callable, Awaitable
 
 import httpx
@@ -315,82 +313,26 @@ Only include candidates that are real entry points in the "confirmed" array. Ana
                 raise
 
     async def _get_api_key(self) -> str:
-        """Get Claude API key from org config, toastapihelper module, helper script, or environment."""
-        # Priority 0: Org-level override (from CodeCircle platform)
+        """Get Claude API key from org config or environment variable."""
+        # Priority 1: Org-level override (pushed from CodeCircle platform)
         org_key = self._ai_config.get("claude_api_key")
         if org_key and org_key.strip():
-            logger.debug("api_key_from_org_config", source="org_ai_config")
+            logger.debug("api_key_source", source="org_ai_config")
             return org_key.strip()
 
-        # Priority 1: Try toastapihelper Python module (most reliable, fresh tokens)
-        try:
-            import toastapihelper
-            # Try common methods/attributes that might exist
-            if hasattr(toastapihelper, 'get_api_key'):
-                api_key = toastapihelper.get_api_key()
-                if api_key and api_key.strip():
-                    logger.debug("api_key_from_module", source="toastapihelper.get_api_key")
-                    return api_key.strip()
-            elif hasattr(toastapihelper, 'get_key'):
-                api_key = toastapihelper.get_key()
-                if api_key and api_key.strip():
-                    logger.debug("api_key_from_module", source="toastapihelper.get_key")
-                    return api_key.strip()
-            elif hasattr(toastapihelper, 'api_key'):
-                api_key = toastapihelper.api_key
-                if api_key and api_key.strip():
-                    logger.debug("api_key_from_module", source="toastapihelper.api_key")
-                    return api_key.strip()
-        except ImportError:
-            # Module doesn't exist, continue to subprocess fallback
-            logger.debug("toastapihelper_module_not_found", message="Falling back to subprocess helper")
-        except Exception as e:
-            logger.warning("toastapihelper_module_error", error=str(e), message="Falling back to subprocess helper")
-
-        # Priority 2: Try helper script (async subprocess) - usually has fresh tokens
-        try:
-            if not self._settings.claude_api_key_helper_path:
-                logger.debug("api_key_helper_path_not_configured")
-            else:
-                process = await asyncio.create_subprocess_exec(
-                    self._settings.claude_api_key_helper_path,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE,
-                )
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=10.0)
-                
-                if process.returncode == 0:
-                    api_key = stdout.decode('utf-8', errors='ignore').strip()
-                    if api_key:
-                        logger.debug("api_key_from_helper", source="subprocess", key_length=len(api_key))
-                        return api_key
-                    else:
-                        logger.warning("api_key_helper_empty_output")
-                else:
-                    error_msg = stderr.decode('utf-8', errors='ignore').strip() if stderr else "Unknown error"
-                    logger.warning("api_key_helper_failed", returncode=process.returncode, error=error_msg[:200])
-        except asyncio.TimeoutError:
-            logger.warning("api_key_helper_timeout", timeout=10.0)
-        except FileNotFoundError:
-            logger.warning("api_key_helper_not_found", path=self._settings.claude_api_key_helper_path)
-        except Exception as e:
-            logger.warning("api_key_helper_error", error=str(e), error_type=type(e).__name__)
-
-        # Priority 3: Fall back to environment variable (may be expired)
+        # Priority 2: Environment variable (CLAUDE_API_KEY)
         if self._settings.claude_api_key:
             api_key = self._settings.claude_api_key.strip()
             if api_key:
-                logger.debug("api_key_from_env", source="environment_variable", key_length=len(api_key))
+                logger.debug("api_key_source", source="environment_variable")
                 return api_key
-            else:
-                logger.warning("api_key_from_env_empty")
 
         raise ValueError(
             "Could not obtain Claude API key. Tried:\n"
-            "1. toastapihelper Python module\n"
-            f"2. Helper script: {self._settings.claude_api_key_helper_path}\n"
-            "3. CLAUDE_API_KEY environment variable\n\n"
-            "Please ensure one of these is available and configured correctly."
+            "1. Organization-level AI config (pushed from CodeCircle)\n"
+            "2. CLAUDE_API_KEY environment variable\n\n"
+            "Configure AI settings in the CodeCircle dashboard (Settings > AI Configuration) "
+            "or set the CLAUDE_API_KEY environment variable."
         )
 
     def _parse_ai_response(

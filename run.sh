@@ -12,13 +12,9 @@ if [ -f .env ]; then
     export $(cat .env | grep -v '^#' | xargs)
 fi
 
-# Get API key from toastApiKeyHelper if not already set
-if [ -z "$CLAUDE_API_KEY" ] && [ -f "/opt/homebrew/bin/toastApiKeyHelper" ]; then
-    echo "Getting API key from toastApiKeyHelper..."
-    export CLAUDE_API_KEY=$(/opt/homebrew/bin/toastApiKeyHelper 2>&1)
-    if [ -z "$CLAUDE_API_KEY" ]; then
-        echo "Warning: Failed to get API key from toastApiKeyHelper"
-    fi
+# Ensure CLAUDE_API_KEY is set (via .env or CodeCircle AI Settings)
+if [ -z "$CLAUDE_API_KEY" ]; then
+    echo "Warning: CLAUDE_API_KEY not set. AI features will use org-level config from CodeCircle."
 fi
 
 # Check if virtual environment is activated

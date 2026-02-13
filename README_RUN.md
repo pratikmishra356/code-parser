@@ -10,7 +10,6 @@
 
 This script will:
 - Load environment variables from `.env`
-- Get API key from `toastApiKeyHelper` automatically
 - Activate virtual environment if needed
 - Start the service with uvicorn
 
@@ -21,8 +20,9 @@ Set environment variables and run:
 ```bash
 # Export environment variables
 export DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/code_parser"
-export AI_PROVIDER="claude"
-export CLAUDE_API_KEY=$(/opt/homebrew/bin/toastApiKeyHelper 2>&1)
+export CLAUDE_API_KEY="your-api-key"
+export CLAUDE_BEDROCK_URL="https://your-bedrock-proxy.example.com"
+export CLAUDE_MODEL_ID="anthropic.claude-sonnet-4-20250514-v1:0"
 export LOG_LEVEL="INFO"
 
 # Run with uvicorn
@@ -34,8 +34,7 @@ uvicorn code_parser.api.app:create_app --factory --host 0.0.0.0 --port 8000 --re
 ```bash
 # Set environment variables (same as Option 2)
 export DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/code_parser"
-export AI_PROVIDER="claude"
-export CLAUDE_API_KEY=$(/opt/homebrew/bin/toastApiKeyHelper 2>&1)
+export CLAUDE_API_KEY="your-api-key"
 
 # Run using Python module
 python -m code_parser.main
@@ -46,16 +45,16 @@ python -m code_parser.main
 The service reads from `.env` file or environment variables:
 
 - `DATABASE_URL` - PostgreSQL connection string (default: `postgresql+asyncpg://postgres:postgres@localhost:5432/code_parser`)
-- `AI_PROVIDER` - AI provider: `claude` or `openai` (default: `claude`)
-- `CLAUDE_API_KEY` - Claude API key (auto-fetched from `toastApiKeyHelper` if not set)
-- `CLAUDE_API_KEY_HELPER_PATH` - Path to toastApiKeyHelper (default: `/opt/homebrew/bin/toastApiKeyHelper`)
+- `CLAUDE_API_KEY` - Claude API key (set via env var or CodeCircle AI Settings)
+- `CLAUDE_BEDROCK_URL` - Bedrock proxy URL (set via env var or CodeCircle AI Settings)
+- `CLAUDE_MODEL_ID` - Claude model ID (set via env var or CodeCircle AI Settings)
 - `LOG_LEVEL` - Logging level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL` (default: `INFO`)
 - `DEBUG` - Enable debug mode (default: `false`)
 - `WORKER_COUNT` - Number of background workers (default: `4`)
 
 ## Notes
 
-- The service will automatically get the API key from `toastApiKeyHelper` if `CLAUDE_API_KEY` is not set
+- AI configuration can be managed centrally via CodeCircle AI Settings, which pushes config to connected organizations
 - Make sure PostgreSQL is running and accessible at the configured `DATABASE_URL`
 - The service runs on `http://localhost:8000` by default
 - API docs available at `http://localhost:8000/docs`

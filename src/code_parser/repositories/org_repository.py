@@ -79,6 +79,7 @@ class OrgRepository:
             if hasattr(model, key):
                 setattr(model, key, value)
         await self._session.flush()
+        await self._session.refresh(model)
         return self._to_domain(model)
 
     def _to_domain(self, model: OrganizationModel) -> Organization:
