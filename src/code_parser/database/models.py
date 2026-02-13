@@ -29,6 +29,13 @@ class OrganizationModel(Base):
     id: Mapped[str] = mapped_column(String(26), primary_key=True)  # ULID
     name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # AI / LLM configuration (pushed from CodeCircle platform)
+    claude_api_key: Mapped[str | None] = mapped_column(Text, nullable=True)
+    claude_bedrock_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    claude_model_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    claude_max_tokens: Mapped[int | None] = mapped_column(nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

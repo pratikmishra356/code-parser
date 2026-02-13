@@ -17,8 +17,9 @@ logger = get_logger(__name__)
 class AIService:
     """Service for AI-powered entry point confirmation."""
 
-    def __init__(self) -> None:
+    def __init__(self, ai_config: dict | None = None) -> None:
         self._settings = get_settings()
+        self._ai_config = ai_config or {}  # org-level overrides from DB
         self._min_confidence = 0.7  # Minimum confidence threshold
 
     async def confirm_entry_points(
@@ -277,11 +278,15 @@ Only include candidates that are real entry points in the "confirmed" array. Ana
 
     async def _call_claude_bedrock(self, prompt: str, max_tokens: int = 4096) -> dict[str, Any]:
         """Call Claude Bedrock API via Toast's proxy."""
-        # Get API key
+        # Get API key (org override > env var > helper)
         api_key = await self._get_api_key()
 
+        # Use org-level overrides if available, fall back to settings
+        bedrock_url = self._ai_config.get("claude_bedrock_url") or self._settings.claude_bedrock_url
+        model_id = self._ai_config.get("claude_model_id") or self._settings.claude_model_id
+
         # Prepare request - using Toast's Bedrock proxy format
-        url = f"{self._settings.claude_bedrock_url}/bedrock/model/{self._settings.claude_model_id}/invoke"
+        url = f"{bedrock_url}/bedrock/model/{model_id}/invoke"
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
@@ -310,7 +315,13 @@ Only include candidates that are real entry points in the "confirmed" array. Ana
                 raise
 
     async def _get_api_key(self) -> str:
-        """Get Claude API key from toastapihelper module, helper script, or environment."""
+        """Get Claude API key from org config, toastapihelper module, helper script, or environment."""
+        # Priority 0: Org-level override (from CodeCircle platform)
+        org_key = self._ai_config.get("claude_api_key")
+        if org_key and org_key.strip():
+            logger.debug("api_key_from_org_config", source="org_ai_config")
+            return org_key.strip()
+
         # Priority 1: Try toastapihelper Python module (most reliable, fresh tokens)
         try:
             import toastapihelper

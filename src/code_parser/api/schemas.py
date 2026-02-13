@@ -23,6 +23,15 @@ class CreateOrganizationRequest(BaseModel):
     )
 
 
+class AIConfigUpdateRequest(BaseModel):
+    """Request to update AI config on an organization (from CodeCircle platform)."""
+
+    claude_api_key: str | None = None
+    claude_bedrock_url: str | None = None
+    claude_model_id: str | None = None
+    claude_max_tokens: int | None = None
+
+
 class CreateRepositoryRequest(BaseModel):
     """Request to create and parse a new repository."""
 

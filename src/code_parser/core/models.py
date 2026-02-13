@@ -205,6 +205,11 @@ class Organization:
     id: str
     name: str
     description: str | None = None
+    # AI / LLM config (pushed from CodeCircle platform)
+    claude_api_key: str | None = None
+    claude_bedrock_url: str | None = None
+    claude_model_id: str | None = None
+    claude_max_tokens: int | None = None
     created_at: datetime = field(default_factory=datetime.utcnow)
     updated_at: datetime = field(default_factory=datetime.utcnow)
 

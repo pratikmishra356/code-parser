@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Query, status
 
-from code_parser.api.dependencies import DbSession, FlowSvc
+from code_parser.api.dependencies import DbSession, FlowSvc, get_org_ai_config
 from code_parser.api.schemas import (
     CodeSnippetResponse,
     DetectEntryPointsRequest,
@@ -26,13 +26,24 @@ router = APIRouter(prefix="/repos/{repo_id}/entry-points", tags=["entry-points"]
 logger = get_logger(__name__)
 
 
-def _get_entry_point_service(session: DbSession) -> EntryPointService:
-    """Get entry point service instance."""
+async def _get_entry_point_service(session: DbSession, repo_id: str | None = None) -> EntryPointService:
+    """Get entry point service instance with org-level AI config if available."""
     entry_point_repo = EntryPointRepository(session)
     file_repo = FileRepository(session)
     repo_repo = RepoRepository(session)
     symbol_repo = SymbolRepository(session)
-    return EntryPointService(session, entry_point_repo, file_repo, repo_repo, symbol_repo)
+
+    # Look up org AI config from the repo's organization
+    ai_config = None
+    if repo_id:
+        repo = await repo_repo.get_by_id(repo_id)
+        if repo and repo.org_id:
+            ai_config = await get_org_ai_config(session, repo.org_id)
+
+    return EntryPointService(
+        session, entry_point_repo, file_repo, repo_repo, symbol_repo,
+        ai_config=ai_config,
+    )
 
 
 @router.post(
@@ -58,7 +69,7 @@ async def detect_entry_points(
     
     Returns detection statistics.
     """
-    service = _get_entry_point_service(session)
+    service = await _get_entry_point_service(session, repo_id=repo_id)
     
     try:
         result = await service.detect_entry_points(
@@ -208,6 +219,7 @@ async def generate_flow(
     repo_id: str,
     entry_point_id: str,
     flow_service: FlowSvc,
+    session: DbSession,
 ) -> FlowGenerationResponse:
     """
     Generate flow documentation for an entry point.
@@ -220,6 +232,14 @@ async def generate_flow(
     
     If a flow already exists, it will be replaced with the new one.
     """
+    # Inject org-level AI config into the flow service's AI service
+    from code_parser.repositories.repo_repository import RepoRepository as _RR
+    repo = await _RR(session).get_by_id(repo_id)
+    if repo and repo.org_id:
+        ai_cfg = await get_org_ai_config(session, repo.org_id)
+        if ai_cfg:
+            flow_service._ai_service._ai_config = ai_cfg
+
     try:
         flow = await flow_service.generate_flow(entry_point_id, repo_id)
         

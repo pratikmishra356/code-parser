@@ -4,9 +4,11 @@ from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from code_parser.database.connection import get_session_manager
+from code_parser.database.models import OrganizationModel
 from code_parser.repositories import (
     EntryPointRepository,
     FileRepository,
@@ -66,6 +68,26 @@ def get_entry_point_repository(session: DbSession) -> EntryPointRepository:
 def get_flow_repository(session: DbSession) -> FlowRepository:
     """Dependency for FlowRepository."""
     return FlowRepository(session)
+
+
+async def get_org_ai_config(session: AsyncSession, org_id: str) -> dict | None:
+    """Look up AI config for an organization."""
+    result = await session.execute(
+        select(OrganizationModel).where(OrganizationModel.id == org_id)
+    )
+    org = result.scalar_one_or_none()
+    if not org:
+        return None
+    config = {}
+    if org.claude_api_key:
+        config["claude_api_key"] = org.claude_api_key
+    if org.claude_bedrock_url:
+        config["claude_bedrock_url"] = org.claude_bedrock_url
+    if org.claude_model_id:
+        config["claude_model_id"] = org.claude_model_id
+    if org.claude_max_tokens:
+        config["claude_max_tokens"] = org.claude_max_tokens
+    return config if config else None
 
 
 def get_flow_service(

@@ -65,12 +65,32 @@ class OrgRepository:
             return True
         return False
 
+    async def update_ai_config(
+        self, org_id: str, config: dict
+    ) -> Organization | None:
+        """Update AI config fields on an organization."""
+        result = await self._session.execute(
+            select(OrganizationModel).where(OrganizationModel.id == org_id)
+        )
+        model = result.scalar_one_or_none()
+        if not model:
+            return None
+        for key, value in config.items():
+            if hasattr(model, key):
+                setattr(model, key, value)
+        await self._session.flush()
+        return self._to_domain(model)
+
     def _to_domain(self, model: OrganizationModel) -> Organization:
         """Convert ORM model to domain entity."""
         return Organization(
             id=model.id,
             name=model.name,
             description=model.description,
+            claude_api_key=model.claude_api_key,
+            claude_bedrock_url=model.claude_bedrock_url,
+            claude_model_id=model.claude_model_id,
+            claude_max_tokens=model.claude_max_tokens,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )

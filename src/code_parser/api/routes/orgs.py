@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from code_parser.api.dependencies import DbSession
 from code_parser.api.schemas import (
+    AIConfigUpdateRequest,
     CreateOrganizationRequest,
     ErrorResponse,
     OrganizationResponse,
@@ -89,6 +90,35 @@ async def get_organization(
             detail=f"Organization not found: {org_id}",
         )
 
+    return OrganizationResponse(
+        id=org.id,
+        name=org.name,
+        description=org.description,
+        created_at=org.created_at,
+        updated_at=org.updated_at,
+    )
+
+
+@router.put(
+    "/{org_id}/ai-config",
+    response_model=OrganizationResponse,
+    responses={404: {"model": ErrorResponse}},
+)
+async def update_ai_config(
+    org_id: str,
+    request: AIConfigUpdateRequest,
+    session: DbSession,
+) -> OrganizationResponse:
+    """Update AI/LLM configuration for an organization (called by CodeCircle platform)."""
+    org_repo = OrgRepository(session)
+    config = request.model_dump(exclude_unset=True)
+    org = await org_repo.update_ai_config(org_id, config)
+    if not org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Organization not found: {org_id}",
+        )
+    logger.info("ai_config_updated", org_id=org_id, fields=list(config.keys()))
     return OrganizationResponse(
         id=org.id,
         name=org.name,

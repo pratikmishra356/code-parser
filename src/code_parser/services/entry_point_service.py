@@ -42,6 +42,7 @@ class EntryPointService:
         file_repo: FileRepository,
         repo_repo: RepoRepository,
         symbol_repo: SymbolRepository,
+        ai_config: dict | None = None,
     ) -> None:
         self._session = session
         self._entry_point_repo = entry_point_repo
@@ -49,7 +50,7 @@ class EntryPointService:
         self._repo_repo = repo_repo
         self._symbol_repo = symbol_repo
         self._parser_registry = get_parser_registry()
-        self._ai_service = AIService()
+        self._ai_service = AIService(ai_config=ai_config)
 
     async def detect_entry_points(
         self, repo_id: str, force_redetect: bool = False
