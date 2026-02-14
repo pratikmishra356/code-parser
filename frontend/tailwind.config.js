@@ -7,27 +7,44 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['IBM Plex Sans', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'IBM Plex Sans', 'system-ui', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       colors: {
         surface: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617',
+          50: '#ffffff',
+          100: '#fafbfc',
+          200: '#f5f7fa',
+          300: '#e8ecf1',
+          400: '#d1d9e3',
+          500: '#a8b4c5',
+          600: '#7d8fa3',
+          700: '#5a6b7f',
+          800: '#3d4859',
+          900: '#252d3a',
+          950: '#1a1f2a',
         },
         accent: {
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
+          50: '#e6faf5',
+          100: '#b3f0e0',
+          200: '#80e6cb',
+          300: '#4ddcb6',
+          400: '#1ad2a1',
+          500: '#10b386', // Primary vibrant teal-green
+          600: '#0d8f6b',
+          700: '#0a6b50',
+          800: '#074735',
+          900: '#04231a',
+        },
+        primary: {
+          50: '#e6faf5',
+          100: '#b3f0e0',
+          200: '#80e6cb',
+          300: '#4ddcb6',
+          400: '#1ad2a1',
+          500: '#10b386', // Primary vibrant teal-green
+          600: '#0d8f6b',
+          700: '#0a6b50',
         }
       }
     },

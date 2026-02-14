@@ -16,10 +16,10 @@ function NavLink({ to, children, icon: Icon }) {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+      className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg transition-all font-medium ${
         isActive 
-          ? 'bg-accent-500/20 text-accent-400' 
-          : 'text-surface-200 hover:bg-surface-800'
+          ? 'bg-accent-500 text-white shadow-sm shadow-accent-500/20' 
+          : 'text-surface-700 hover:bg-surface-100 hover:text-accent-600'
       }`}
     >
       {Icon && <Icon size={18} />}
@@ -49,11 +49,11 @@ function Breadcrumb() {
   if (items.length === 0) return null
   
   return (
-    <div className="flex items-center gap-1 text-sm text-surface-500 px-2 mb-2">
+    <div className="flex items-center gap-1 text-sm text-surface-600 px-2 mb-2">
       {items.map((item, i) => (
         <div key={i} className="flex items-center gap-1">
-          {i > 0 && <ChevronRight size={12} />}
-          <Link to={item.to} className="hover:text-accent-400 transition-colors">
+          {i > 0 && <ChevronRight size={12} className="text-surface-400" />}
+          <Link to={item.to} className="hover:text-accent-600 transition-colors font-medium">
             {item.isOrgLink ? <OrgName orgId={item.orgId} /> : item.label}
           </Link>
         </div>
@@ -87,16 +87,16 @@ function SidebarNav() {
 
 export default function App() {
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-surface-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-surface-900 border-r border-surface-800 p-4 flex flex-col">
+      <aside className="w-64 bg-white border-r border-surface-200 shadow-sm p-5 flex flex-col">
         <div className="flex items-center gap-3 px-2 py-4 mb-6">
-          <div className="p-2 bg-accent-500/20 rounded-lg">
-            <Code2 className="text-accent-400" size={24} />
+          <div className="p-2.5 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl shadow-sm">
+            <Code2 className="text-white" size={22} />
           </div>
           <div>
-            <h1 className="font-semibold text-lg">Code Parser</h1>
-            <p className="text-xs text-surface-400">AST Explorer</p>
+            <h1 className="font-bold text-lg text-surface-900">Code Parser</h1>
+            <p className="text-xs text-surface-600 font-medium">AST Explorer</p>
           </div>
         </div>
         
@@ -104,15 +104,15 @@ export default function App() {
         
         <Breadcrumb />
         
-        <div className="mt-auto pt-4 border-t border-surface-800">
-          <p className="text-xs text-surface-500 px-2">
+        <div className="mt-auto pt-4 border-t border-surface-200">
+          <p className="text-xs text-surface-600 px-2 leading-relaxed">
             Multi-tenant code parsing with AST analysis and call graphs
           </p>
         </div>
       </aside>
       
       {/* Main content */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto bg-surface-50">
         <Routes>
           {/* Organization routes */}
           <Route path="/" element={<OrgList />} />

@@ -2,8 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-surface-950 text-surface-100 antialiased;
+@layer base {
+  body {
+    @apply bg-surface-50 text-surface-900 antialiased;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(16, 179, 134, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(16, 179, 134, 0.03) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
 }
 
 /* Custom scrollbar */
@@ -13,15 +20,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-surface-900;
+  @apply bg-surface-100;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-surface-700 rounded-full;
+  @apply bg-surface-300 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-surface-600;
+  @apply bg-surface-400;
 }
 
 /* Code blocks */
@@ -30,6 +37,13 @@ pre, code {
 }
 
 .code-block {
-  @apply bg-surface-900 border border-surface-800 rounded-lg p-4 overflow-x-auto text-sm;
+  @apply bg-surface-100 border border-surface-200 rounded-lg p-4 overflow-x-auto text-sm;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
 

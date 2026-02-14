@@ -20,24 +20,24 @@ function CopyButton({ text, className = '' }) {
   return (
     <button
       onClick={handleCopy}
-      className={`p-1.5 text-surface-400 hover:text-accent-400 hover:bg-surface-800 rounded transition-colors ${className}`}
+      className={`p-1.5 text-surface-500 hover:text-accent-600 hover:bg-surface-100 rounded-lg transition-colors ${className}`}
       title="Copy to clipboard"
     >
-      {copied ? <Check size={14} /> : <Copy size={14} />}
+      {copied ? <Check size={14} className="text-accent-600" /> : <Copy size={14} />}
     </button>
   )
 }
 
 function CodeBlock({ code, language, title }) {
   return (
-    <div className="bg-surface-900 border border-surface-800 rounded-lg overflow-hidden">
+    <div className="bg-white border border-surface-200 rounded-xl overflow-hidden shadow-sm">
       {title && (
-        <div className="px-4 py-2 bg-surface-800 border-b border-surface-700 flex items-center justify-between">
-          <span className="text-sm font-medium text-surface-300">{title}</span>
+        <div className="px-4 py-2.5 bg-surface-50 border-b border-surface-200 flex items-center justify-between">
+          <span className="text-sm font-semibold text-surface-700">{title}</span>
           <CopyButton text={code} />
         </div>
       )}
-      <pre className="p-4 overflow-x-auto text-sm font-mono">
+      <pre className="p-4 overflow-x-auto text-sm font-mono bg-surface-50 text-surface-800">
         <code className={`language-${language}`}>{code}</code>
       </pre>
     </div>
@@ -48,22 +48,24 @@ function ExploreSection({ title, icon: Icon, children, defaultOpen = true }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   
   return (
-    <div className="bg-surface-900 border border-surface-800 rounded-xl overflow-hidden">
+    <div className="bg-white border border-surface-200 rounded-xl overflow-hidden shadow-sm mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-800 transition-colors"
+        className="w-full px-6 py-4 flex items-center justify-between hover:bg-surface-50 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Icon size={20} className="text-accent-400" />
-          <h2 className="text-lg font-semibold">{title}</h2>
+          <div className="p-1.5 bg-accent-50 rounded-lg">
+            <Icon size={18} className="text-accent-600" />
+          </div>
+          <h2 className="text-lg font-semibold text-surface-900">{title}</h2>
         </div>
         <ChevronRight 
           size={20} 
-          className={`text-surface-500 transition-transform ${isOpen ? 'rotate-90' : ''}`} 
+          className={`text-surface-400 transition-transform ${isOpen ? 'rotate-90' : ''}`} 
         />
       </button>
       {isOpen && (
-        <div className="px-6 py-4 border-t border-surface-800">
+        <div className="px-6 py-5 border-t border-surface-100 bg-surface-50/50">
           {children}
         </div>
       )}
@@ -134,23 +136,23 @@ export default function Explore() {
     <div className="p-8 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-accent-500/10 rounded-lg">
-            <Sparkles size={24} className="text-accent-400" />
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-gradient-to-br from-accent-500 to-accent-600 rounded-xl shadow-sm">
+            <Sparkles size={24} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">AI Exploration</h1>
-            <p className="text-surface-400 mt-1">
+            <h1 className="text-3xl font-bold text-surface-900">AI Exploration</h1>
+            <p className="text-surface-600 mt-1.5 text-sm">
               Explore repositories, entry points, files, and flows like an AI agent
             </p>
           </div>
         </div>
         {org && (
-          <div className="flex items-center gap-2 text-sm text-surface-500">
-            <Building2 size={14} />
-            <span>{org.name}</span>
-            <ChevronRight size={14} />
-            <span className="font-mono">{orgId}</span>
+          <div className="flex items-center gap-2 text-sm text-surface-600 bg-white px-4 py-2 rounded-lg border border-surface-200 w-fit">
+            <Building2 size={14} className="text-accent-600" />
+            <span className="font-medium">{org.name}</span>
+            <ChevronRight size={14} className="text-surface-400" />
+            <span className="font-mono text-xs">{orgId}</span>
           </div>
         )}
       </div>
@@ -165,7 +167,7 @@ export default function Explore() {
               value={repoSearch}
               onChange={(e) => setRepoSearch(e.target.value)}
               placeholder="Search repos by name or description (supports regex)..."
-              className="w-full bg-surface-800 border border-surface-700 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500"
+              className="w-full bg-white border border-surface-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 text-surface-900 placeholder:text-surface-400"
             />
           </div>
           
@@ -176,7 +178,7 @@ export default function Explore() {
           )}
           
           {repos && repos.length === 0 && (
-            <p className="text-center py-8 text-surface-500">No repositories found</p>
+            <p className="text-center py-8 text-surface-500 text-sm">No repositories found</p>
           )}
           
           {repos && repos.length > 0 && (
@@ -185,17 +187,17 @@ export default function Explore() {
                 <button
                   key={repo.id}
                   onClick={() => setSelectedRepoId(repo.id)}
-                  className={`w-full text-left p-4 rounded-lg border transition-colors ${
+                  className={`w-full text-left p-4 rounded-lg border transition-all ${
                     selectedRepoId === repo.id
-                      ? 'bg-accent-500/10 border-accent-500/50'
-                      : 'bg-surface-800 border-surface-700 hover:border-surface-600'
+                      ? 'bg-accent-50 border-accent-500 shadow-sm'
+                      : 'bg-white border-surface-200 hover:border-accent-300 hover:shadow-sm'
                   }`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <h3 className="font-semibold">{repo.name}</h3>
-                        <span className="text-xs px-2 py-0.5 bg-surface-700 rounded">
+                        <span className="text-xs px-2.5 py-1 bg-surface-100 text-surface-700 rounded-md font-medium border border-surface-200">
                           {repo.status}
                         </span>
                       </div>
@@ -229,8 +231,8 @@ export default function Explore() {
                   type="text"
                   value={entryPointSearch}
                   onChange={(e) => setEntryPointSearch(e.target.value)}
-                  placeholder="Search entry points (supports regex)..."
-                  className="w-full bg-surface-800 border border-surface-700 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500"
+              placeholder="Search entry points (supports regex)..."
+              className="w-full bg-white border border-surface-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 text-surface-900 placeholder:text-surface-400"
                 />
               </div>
               
@@ -241,7 +243,7 @@ export default function Explore() {
               )}
               
               {entryPoints && entryPoints.length === 0 && (
-                <p className="text-center py-8 text-surface-500">No entry points found</p>
+                <p className="text-center py-8 text-surface-500 text-sm">No entry points found</p>
               )}
               
               {entryPoints && entryPoints.length > 0 && (
@@ -249,10 +251,10 @@ export default function Explore() {
                   {entryPoints.map((ep) => (
                     <label
                       key={ep.id}
-                      className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-colors ${
+                      className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
                         selectedEntryPointIds.includes(ep.id)
-                          ? 'bg-accent-500/10 border-accent-500/50'
-                          : 'bg-surface-800 border-surface-700 hover:border-surface-600'
+                          ? 'bg-accent-50 border-accent-500 shadow-sm'
+                          : 'bg-white border-surface-200 hover:border-accent-300 hover:shadow-sm'
                       }`}
                     >
                       <input
@@ -264,10 +266,10 @@ export default function Explore() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold">{ep.name}</h3>
-                          <span className="text-xs px-2 py-0.5 bg-accent-600/20 text-accent-400 rounded">
+                          <span className="text-xs px-2.5 py-1 bg-accent-100 text-accent-700 rounded-md font-medium">
                             {ep.entry_point_type}
                           </span>
-                          <span className="text-xs px-2 py-0.5 bg-surface-700 rounded">
+                          <span className="text-xs px-2.5 py-1 bg-surface-100 text-surface-700 rounded-md font-medium border border-surface-200">
                             {ep.framework}
                           </span>
                         </div>
@@ -303,12 +305,12 @@ export default function Explore() {
                 </p>
               )}
               
-              {flows && flows.length > 0 && (
+                  {flows && flows.length > 0 && (
                 <div className="space-y-6">
                   {flows.map((flow) => (
-                    <div key={flow.entry_point_id} className="bg-surface-800 rounded-lg p-5">
-                      <h3 className="text-lg font-semibold mb-3">{flow.flow_name}</h3>
-                      <p className="text-sm text-surface-400 mb-4">{flow.technical_summary}</p>
+                    <div key={flow.entry_point_id} className="bg-white rounded-xl p-6 border border-surface-200 shadow-sm">
+                      <h3 className="text-xl font-bold text-surface-900 mb-3">{flow.flow_name}</h3>
+                      <p className="text-sm text-surface-600 mb-5 leading-relaxed">{flow.technical_summary}</p>
                       
                       {flow.file_paths && flow.file_paths.length > 0 && (
                         <div className="mb-4">
@@ -319,7 +321,7 @@ export default function Explore() {
                             {flow.file_paths.map((path, idx) => (
                               <span
                                 key={idx}
-                                className="px-2 py-1 bg-surface-900 rounded text-xs font-mono text-surface-300"
+                                className="px-2.5 py-1 bg-surface-100 rounded-md text-xs font-mono text-surface-700 border border-surface-200"
                               >
                                 {path}
                               </span>
@@ -330,14 +332,14 @@ export default function Explore() {
                       
                       <div className="space-y-4">
                         {flow.steps.map((step) => (
-                          <div key={step.step_number} className="bg-surface-900 rounded-lg p-4">
-                            <div className="flex items-start gap-3 mb-2">
-                              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent-600/20 text-accent-400 flex items-center justify-center text-sm font-semibold">
+                          <div key={step.step_number} className="bg-surface-50 rounded-xl p-5 border border-surface-200">
+                            <div className="flex items-start gap-4 mb-3">
+                              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-accent-500 to-accent-600 text-white flex items-center justify-center text-sm font-bold shadow-sm">
                                 {step.step_number}
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-semibold mb-1">{step.title}</h4>
-                                <p className="text-sm text-surface-400 mb-3">{step.description}</p>
+                                <h4 className="font-bold text-surface-900 mb-2 text-base">{step.title}</h4>
+                                <p className="text-sm text-surface-600 mb-4 leading-relaxed">{step.description}</p>
                                 
                                 {step.important_code_snippets && step.important_code_snippets.length > 0 && (
                                   <div className="space-y-2">
@@ -372,8 +374,8 @@ export default function Explore() {
                   type="text"
                   value={fileSearch}
                   onChange={(e) => setFileSearch(e.target.value)}
-                  placeholder="Search files by path (supports regex)..."
-                  className="w-full bg-surface-800 border border-surface-700 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500"
+              placeholder="Search files by path (supports regex)..."
+              className="w-full bg-white border border-surface-200 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 text-surface-900 placeholder:text-surface-400"
                 />
               </div>
               
@@ -384,7 +386,7 @@ export default function Explore() {
               )}
               
               {files && files.length === 0 && (
-                <p className="text-center py-8 text-surface-500">No files found</p>
+                <p className="text-center py-8 text-surface-500 text-sm">No files found</p>
               )}
               
               {files && files.length > 0 && (
@@ -393,10 +395,10 @@ export default function Explore() {
                     <button
                       key={file.id}
                       onClick={() => setSelectedFileId(file.id)}
-                      className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      className={`w-full text-left p-3 rounded-lg border transition-all ${
                         selectedFileId === file.id
-                          ? 'bg-accent-500/10 border-accent-500/50'
-                          : 'bg-surface-800 border-surface-700 hover:border-surface-600'
+                          ? 'bg-accent-50 border-accent-500 shadow-sm'
+                          : 'bg-white border-surface-200 hover:border-accent-300 hover:shadow-sm'
                       }`}
                     >
                       <div className="flex items-center gap-2">
