@@ -10,22 +10,23 @@ import { api } from '../api'
 import { TreeView, FolderStructureView } from '../components/TreeView'
 
 const kindConfig = {
-  function: { icon: FunctionSquare, color: 'text-purple-400' },
-  method: { icon: FunctionSquare, color: 'text-purple-400' },
-  class: { icon: Box, color: 'text-yellow-400' },
-  module: { icon: FileCode, color: 'text-blue-400' },
-  import: { icon: Import, color: 'text-green-400' },
-  interface: { icon: Braces, color: 'text-cyan-400' },
-  struct: { icon: Box, color: 'text-orange-400' },
-  trait: { icon: Braces, color: 'text-pink-400' },
-  enum: { icon: Braces, color: 'text-amber-400' },
-  impl: { icon: Box, color: 'text-indigo-400' },
+  function: { icon: FunctionSquare, color: 'text-purple-400', colorOnDark: 'text-purple-300' },
+  method: { icon: FunctionSquare, color: 'text-purple-400', colorOnDark: 'text-purple-300' },
+  class: { icon: Box, color: 'text-yellow-400', colorOnDark: 'text-yellow-300' },
+  module: { icon: FileCode, color: 'text-blue-400', colorOnDark: 'text-blue-300' },
+  import: { icon: Import, color: 'text-green-400', colorOnDark: 'text-green-300' },
+  interface: { icon: Braces, color: 'text-cyan-400', colorOnDark: 'text-cyan-300' },
+  struct: { icon: Box, color: 'text-orange-400', colorOnDark: 'text-orange-300' },
+  trait: { icon: Braces, color: 'text-pink-400', colorOnDark: 'text-pink-300' },
+  enum: { icon: Braces, color: 'text-amber-400', colorOnDark: 'text-amber-300' },
+  impl: { icon: Box, color: 'text-indigo-400', colorOnDark: 'text-indigo-300' },
 }
 
-function KindIcon({ kind }) {
-  const config = kindConfig[kind] || { icon: Box, color: 'text-surface-400' }
+function KindIcon({ kind, onDark }) {
+  const config = kindConfig[kind] || { icon: Box, color: 'text-surface-400', colorOnDark: 'text-surface-300' }
   const Icon = config.icon
-  return <Icon size={16} className={config.color} />
+  const colorClass = onDark ? (config.colorOnDark || config.color) : config.color
+  return <Icon size={16} className={colorClass} />
 }
 
 const kindOptions = [
@@ -432,14 +433,14 @@ export default function RepoDetail() {
                     }
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-surface-800 hover:bg-surface-700 rounded-lg font-medium transition-colors text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-surface-300 hover:border-surface-500 hover:bg-surface-100 rounded-lg font-semibold text-surface-800 transition-colors text-sm shadow-sm"
               >
                 <Zap size={16} />
                 Re-parse
               </button>
               <Link
                 to={`${repoBasePath}/lookup`}
-                className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-500 rounded-lg font-medium transition-colors text-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-500 text-white rounded-lg font-semibold transition-colors text-sm shadow-sm"
               >
                 <Crosshair size={16} />
                 Symbol Lookup
@@ -452,21 +453,21 @@ export default function RepoDetail() {
       {/* Stats Cards */}
       {stats && (
         <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-surface-900 border border-surface-800 rounded-lg p-4">
-            <div className="flex items-center gap-2 text-surface-400 text-sm mb-1">
-              <BarChart3 size={14} />
+          <div className="bg-surface-900 border border-surface-700 rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 text-surface-300 text-sm mb-1">
+              <BarChart3 size={14} className="text-accent-400" />
               Total Symbols
             </div>
             <p className="text-2xl font-bold text-accent-400">{stats.total.toLocaleString()}</p>
           </div>
           
           {Object.entries(stats.by_kind).slice(0, 3).map(([kind, count]) => (
-            <div key={kind} className="bg-surface-900 border border-surface-800 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-surface-400 text-sm mb-1">
-                <KindIcon kind={kind} />
+            <div key={kind} className="bg-surface-900 border border-surface-700 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center gap-2 text-surface-300 text-sm mb-1">
+                <KindIcon kind={kind} onDark />
                 {kind.charAt(0).toUpperCase() + kind.slice(1)}s
               </div>
-              <p className="text-2xl font-bold">{count.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-white">{count.toLocaleString()}</p>
             </div>
           ))}
         </div>
@@ -474,13 +475,13 @@ export default function RepoDetail() {
 
       {/* Repository Languages */}
       {repo && repo.languages && repo.languages.length > 0 && (
-        <div className="mb-6 bg-surface-900 border border-surface-800 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-surface-400 mb-3">Detected Languages</h3>
+        <div className="mb-6 bg-surface-900 border border-surface-700 rounded-xl p-4 shadow-sm">
+          <h3 className="text-sm font-medium text-surface-300 mb-3">Detected Languages</h3>
           <div className="flex flex-wrap gap-2">
             {repo.languages.map((lang) => (
               <span 
                 key={lang} 
-                className="px-3 py-1.5 bg-accent-600/20 text-accent-400 rounded-full text-sm font-medium"
+                className="px-3 py-1.5 bg-accent-500/25 text-accent-300 border border-accent-500/40 rounded-full text-sm font-medium"
               >
                 {lang}
               </span>
@@ -491,11 +492,11 @@ export default function RepoDetail() {
 
       {/* Language breakdown */}
       {stats && stats.by_language && Object.keys(stats.by_language).length > 0 && (
-        <div className="mb-6 bg-surface-900 border border-surface-800 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-surface-400 mb-3">Symbols by Language</h3>
+        <div className="mb-6 bg-surface-900 border border-surface-700 rounded-xl p-4 shadow-sm">
+          <h3 className="text-sm font-medium text-surface-300 mb-3">Symbols by Language</h3>
           <div className="flex flex-wrap gap-3">
             {Object.entries(stats.by_language).map(([lang, count]) => (
-              <span key={lang} className="px-3 py-1.5 bg-surface-800 rounded-full text-sm">
+              <span key={lang} className="px-3 py-1.5 bg-surface-800 border border-surface-600 rounded-full text-sm text-surface-100">
                 <span className="font-medium">{lang}</span>
                 <span className="text-surface-400 ml-2">{count.toLocaleString()}</span>
               </span>
@@ -505,33 +506,33 @@ export default function RepoDetail() {
       )}
       
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-surface-800">
+      <div className="flex gap-1 mb-6 border-b border-surface-300">
         <button
           onClick={() => setActiveTab('symbols')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
             activeTab === 'symbols'
-              ? 'border-accent-500 text-accent-400'
-              : 'border-transparent text-surface-400 hover:text-white'
+              ? 'border-accent-500 text-accent-600'
+              : 'border-transparent text-surface-600 hover:text-surface-900 hover:border-surface-400'
           }`}
         >
           Symbols
         </button>
         <button
           onClick={() => setActiveTab('files')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
             activeTab === 'files'
-              ? 'border-accent-500 text-accent-400'
-              : 'border-transparent text-surface-400 hover:text-white'
+              ? 'border-accent-500 text-accent-600'
+              : 'border-transparent text-surface-600 hover:text-surface-900 hover:border-surface-400'
           }`}
         >
           Files
         </button>
         <button
           onClick={() => setActiveTab('tree')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
             activeTab === 'tree'
-              ? 'border-accent-500 text-accent-400'
-              : 'border-transparent text-surface-400 hover:text-white'
+              ? 'border-accent-500 text-accent-600'
+              : 'border-transparent text-surface-600 hover:text-surface-900 hover:border-surface-400'
           }`}
         >
           <span className="flex items-center gap-2">
@@ -541,10 +542,10 @@ export default function RepoDetail() {
         </button>
         <button
           onClick={() => setActiveTab('entry-points')}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
             activeTab === 'entry-points'
-              ? 'border-accent-500 text-accent-400'
-              : 'border-transparent text-surface-400 hover:text-white'
+              ? 'border-accent-500 text-accent-600'
+              : 'border-transparent text-surface-600 hover:text-surface-900 hover:border-surface-400'
           }`}
         >
           <span className="flex items-center gap-2">
@@ -570,14 +571,14 @@ export default function RepoDetail() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search symbols..."
-                className="w-full bg-surface-900 border border-surface-800 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-accent-500 transition-colors"
+                className="w-full bg-surface-100 border border-surface-300 rounded-lg pl-10 pr-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-500 focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20 transition-colors"
               />
             </div>
             
             <select
               value={selectedKind}
               onChange={(e) => setSelectedKind(e.target.value)}
-              className="bg-surface-900 border border-surface-800 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-accent-500"
+              className="bg-surface-100 border border-surface-300 rounded-lg px-4 py-2.5 text-sm text-surface-900 focus:outline-none focus:border-accent-500 focus:ring-2 focus:ring-accent-500/20"
             >
               {kindOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -616,7 +617,7 @@ export default function RepoDetail() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{symbol.name}</span>
-                      <span className="text-xs text-surface-500 px-1.5 py-0.5 bg-surface-800 rounded">
+                      <span className="text-xs text-surface-200 px-2 py-0.5 bg-surface-700 border border-surface-600 rounded font-medium">
                         {symbol.kind}
                       </span>
                     </div>

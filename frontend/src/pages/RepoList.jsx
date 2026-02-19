@@ -179,7 +179,7 @@ function RepoCard({ repo, orgId, onDelete }) {
 }
 
 function SetupInstructions({ orgId }) {
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   
   return (
     <div className="bg-white border border-surface-200 rounded-xl p-6 mb-6 shadow-sm">
