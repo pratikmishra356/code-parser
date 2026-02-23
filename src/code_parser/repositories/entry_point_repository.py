@@ -3,8 +3,9 @@
 from datetime import datetime
 from typing import Sequence
 
-from sqlalchemy import delete, select
+from sqlalchemy import cast, delete, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.types import Text
 from ulid import ULID
 
 from code_parser.core import ConfirmedEntryPoint, EntryPointCandidate, EntryPointType
@@ -78,6 +79,14 @@ class EntryPointRepository:
         )
         return list(result.scalars().all())
 
+    def _search_to_like_pattern(self, search: str) -> str:
+        """Convert regex/glob-style pattern to SQL LIKE pattern for fallback.
+        Escape % and _ first (literal match), then * and .* -> % (wildcard).
+        """
+        pattern = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = pattern.replace(".*", "%").replace("*", "%")
+        return f"%{pattern}%"
+
     async def list_by_repo_with_search(
         self,
         repo_id: str,
@@ -86,18 +95,41 @@ class EntryPointRepository:
         offset: int = 0,
     ) -> list[EntryPointModel]:
         """
-        List entry points for a repo with optional regex search on name/description.
+        List entry points for a repo with optional search on name, description, and metadata.
+
+        Uses regex (~*) when possible; falls back to ILIKE if regex is invalid.
+        Metadata (path, method, etc.) is included so path-based searches work.
         """
-        from sqlalchemy import or_
         query = select(EntryPointModel).where(EntryPointModel.repo_id == repo_id)
 
-        if search:
-            query = query.where(
-                or_(
-                    EntryPointModel.name.op("~*")(search),
-                    EntryPointModel.description.op("~*")(search),
-                )
+        if search and search.strip():
+            search = search.strip()
+            metadata_as_text = cast(EntryPointModel.entry_metadata, Text)
+            regex_conditions = or_(
+                EntryPointModel.name.op("~*")(search),
+                EntryPointModel.description.op("~*")(search),
+                metadata_as_text.op("~*")(search),
             )
+            query = query.where(regex_conditions)
+
+            try:
+                query = query.order_by(EntryPointModel.detected_at.desc()).limit(limit).offset(offset)
+                result = await self._session.execute(query)
+                return list(result.scalars().all())
+            except Exception:
+                # Invalid regex (e.g. unescaped special chars) - fallback to ILIKE
+                like_pattern = self._search_to_like_pattern(search)
+                like_conditions = or_(
+                    EntryPointModel.name.ilike(like_pattern),
+                    EntryPointModel.description.ilike(like_pattern),
+                    metadata_as_text.ilike(like_pattern),
+                )
+                query = select(EntryPointModel).where(
+                    EntryPointModel.repo_id == repo_id,
+                    like_conditions,
+                ).order_by(EntryPointModel.detected_at.desc()).limit(limit).offset(offset)
+                result = await self._session.execute(query)
+                return list(result.scalars().all())
 
         query = query.order_by(EntryPointModel.detected_at.desc()).limit(limit).offset(offset)
         result = await self._session.execute(query)
